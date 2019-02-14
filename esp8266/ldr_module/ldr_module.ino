@@ -3,6 +3,11 @@
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
 
+String apiKey = "12GK5TRNPM50F9M5";
+const char* ssid = "AndroidAP";
+const char* password = "fnei9721"; 
+const char* server = "api.thingspeak.com";
+
 ESP8266WiFiMulti WiFiMulti;
 HTTPClient http;
 
@@ -14,7 +19,7 @@ void setup() {
   Serial.println();
   Serial.println();
   Serial.println("Connecting...");
-  WiFiMulti.addAP("AndroidAP", "fnei9721");
+  WiFiMulti.addAP(ssid, password);
 
 }
 
@@ -24,7 +29,7 @@ void loop() {
     Serial.println(val);
 
 //  https://api.thingspeak.com/update?api_key=12GK5TRNPM50F9M5&field1=0
-    http.begin("http://api.thingspeak.com/update?api_key=12GK5TRNPM50F9M5&field1=" + String(val));
+    http.begin("http://api.thingspeak.com/update?api_key=" + apiKey + "&field1=" + String(val));
 
     int httpCode = http.GET();
     if (httpCode > 0) {
