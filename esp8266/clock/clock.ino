@@ -1,6 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <time.h>
 
+int led = D4;
+
 const char* ssid = "AndroidAP";               //ใส่ชื่อ SSID Wifi
 const char* password = "fnei9721";            //ใส่รหัสผ่าน
 
@@ -23,6 +25,7 @@ struct tm {
 
 void setup()
 {
+  pinMode(led, OUTPUT);
  Serial.begin(115200);
  Serial.setDebugOutput(true);
 
@@ -49,7 +52,28 @@ void loop()
   Serial.println(ctime(&now));
   
   struct tm* p_tm = localtime(&now);        //เอาเวลาปัจจุบันไปเก็บใน Struct
-//  Serial.print(p_tm->tm_sec);             //ตัวอย่างการนำค่าจาก Struct มาใช้
+
+  time_1();
 
   delay(1000);
+}
+
+void time_1(){
+  time_t now = time(nullptr);
+  struct tm* p_tm = localtime(&now);       
+  Serial.print(p_tm->tm_year);            //ตัวอย่างการนำค่าจาก Struct มาใช้
+  Serial.print(" ");
+  Serial.print(p_tm->tm_mon);
+  Serial.print(" ");
+  Serial.print(p_tm->tm_mday);
+  Serial.print(" ");
+  Serial.print(p_tm->tm_hour);
+  Serial.print(" ");
+  Serial.println(p_tm->tm_min);
+//  if(p_tm->tm_year == 119 && p_tm->tm_mon == 2 && p_tm->tm_mday == 15 && p_tm->tm_hour == 20 && p_tm->tm_min == 51) {
+//    digitalWrite(led, 1);
+//  }
+//  else if(p_tm->tm_year == 119 && p_tm->tm_mon == 2 && p_tm->tm_mday == 15 && p_tm->tm_hour == 20 && p_tm->tm_min == 52) {
+//    digitalWrite(led, 0);
+//  }
 }

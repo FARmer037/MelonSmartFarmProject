@@ -12,12 +12,12 @@
 
 MCP3008 adc(CLOCK_PIN, MOSI_PIN, MISO_PIN, CS_PIN);
 
-#define DHTPIN 5 // what pin we're connected to
+#define DHTPIN 2 // what pin we're connected to
 #define DHTTYPE DHT22
 
 DHT dht(DHTPIN, DHTTYPE);
 
-String apiKey = "Z5KNX8GBCLG1CWJZ";
+String apiKey = "5FXVUTMEBRIKVPR1";
 const char* ssid = "AndroidAP";
 const char* password = "fnei9721";
 
@@ -28,6 +28,7 @@ float t = 0;
 float h = 0;
 
 void setup() {
+  dht.begin();
   Serial.begin(115200);
   Serial.println();
   Serial.println();
@@ -39,8 +40,10 @@ void setup() {
 
 void loop() {
   if ((WiFiMulti.run() == WL_CONNECTED)) {
-    int SoilMoisture = adc.readADC(1);
-    int LDR = adc.readADC(3);
+    int SoilMoisture_sensor = adc.readADC(1);
+    int SoilMoisture = map(SoilMoisture_sensor, 1024, 0, 0, 100);
+    int LDR_sensor = adc.readADC(3);
+    int LDR = map(LDR_sensor, 1024, 0, 0, 100);
     
     h = dht.readHumidity();
     t = dht.readTemperature();
