@@ -2,22 +2,23 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
+#include <DHT.h>
 
-String apiKey = "12GK5TRNPM50F9M5";
+String apiKey = "Z5KNX8GBCLG1CWJZ";
 const char* ssid = "AndroidAP";
-const char* password = "fnei9721"; 
-const char* server = "api.thingspeak.com";
+const char* password = "fnei9721";
 
-//String apiKey = "21RMB77JNIKFPU1T"; //มัง
-//const char* ssid = "AndroidAP";
-//const char* password = "fnei9721"; 
-//const char* server = "api.thingspeak.com";
+#define DHTPIN 5 // what pin we're connected to
+#define DHTTYPE DHT22
+ 
+DHT dht(DHTPIN, DHTTYPE);
 
 ESP8266WiFiMulti WiFiMulti;
 HTTPClient http;
 
-int analogPin = A0;
-int val = 0;
+float t = 0;
+float h = 0;
+
 void setup() {
   Serial.begin(115200);
   Serial.println();
@@ -30,11 +31,21 @@ void setup() {
 
 void loop() {
   if ((WiFiMulti.run() == WL_CONNECTED)) {
-    val = analogRead(analogPin);
-    Serial.println(val);
+    h = dht.readHumidity();
+    t = dht.readTemperature();
+//    if (isnan(h) || isnan(t)) {
+//      Serial.println("Failed to read from DHT sensor!");
+//      return;
+//    }
 
-//  https://api.thingspeak.com/update?api_key=12GK5TRNPM50F9M5&field1=0
-    http.begin("http://api.thingspeak.com/update?api_key=" + apiKey + "&field1=" + String(val));
+    Serial.print("Temperature = ");
+    Serial.print(t);
+    Serial.print("\t\t");
+    Serial.print("Humidity = ");
+    Serial.print(h);
+    Serial.println();
+
+    http.begin("http://api.thingspeak.com/update?api_key=" + apiKey + "&field1=" + String(t) + "&field2=" + String(h));
 
     int httpCode = http.GET();
     if (httpCode > 0) {
@@ -49,5 +60,5 @@ void loop() {
     }
     http.end();
   }
-  delay(20000);
+  delay(600000);
 }
