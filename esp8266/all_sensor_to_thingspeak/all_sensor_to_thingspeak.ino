@@ -40,9 +40,9 @@ void setup() {
 
 void loop() {
   if ((WiFiMulti.run() == WL_CONNECTED)) {
-    int SoilMoisture_sensor = adc.readADC(1);
+    int SoilMoisture_sensor = adc.readADC(0);
     int SoilMoisture = map(SoilMoisture_sensor, 1024, 0, 0, 100);
-    int LDR_sensor = adc.readADC(3);
+    int LDR_sensor = adc.readADC(1);
     int LDR = map(LDR_sensor, 1024, 0, 0, 100);
     
     h = dht.readHumidity();
@@ -55,9 +55,13 @@ void loop() {
     Serial.print(h);
     Serial.println();
     Serial.print("Soil Moisture = ");
-    Serial.println(SoilMoisture);
+    Serial.print(SoilMoisture);
+    Serial.print(" %");
+    Serial.print("\t\t");
     Serial.print("LDR = ");
-    Serial.println(LDR);
+    Serial.print(LDR);
+    Serial.print(" %");
+    Serial.println();
     Serial.println();
 
     http.begin("http://api.thingspeak.com/update?api_key=" + apiKey + "&field1=" + String(t) 
@@ -65,10 +69,10 @@ void loop() {
 
     int httpCode = http.GET();
     if (httpCode > 0) {
-      Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+//      Serial.printf("[HTTP] GET... code: %d\n", httpCode);
       if (httpCode == HTTP_CODE_OK) {
         String payload = http.getString();
-        Serial.println(payload);
+//        Serial.println(payload);
       }
     }
     else {

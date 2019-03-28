@@ -53,27 +53,27 @@ void loop()
   
   struct tm* p_tm = localtime(&now);        //เอาเวลาปัจจุบันไปเก็บใน Struct
 
-  time_1();
+  week_1();
 
   delay(1000);
 }
 
-void time_1(){
+void week_1(){
   time_t now = time(nullptr);
   struct tm* p_tm = localtime(&now);       
-  Serial.print(p_tm->tm_year);            //ตัวอย่างการนำค่าจาก Struct มาใช้
-  Serial.print(" ");
-  Serial.print(p_tm->tm_mon);
-  Serial.print(" ");
-  Serial.print(p_tm->tm_mday);
-  Serial.print(" ");
-  Serial.print(p_tm->tm_hour);
-  Serial.print(" ");
-  Serial.println(p_tm->tm_min);
-//  if(p_tm->tm_year == 119 && p_tm->tm_mon == 2 && p_tm->tm_mday == 15 && p_tm->tm_hour == 20 && p_tm->tm_min == 51) {
-//    digitalWrite(led, 1);
-//  }
-//  else if(p_tm->tm_year == 119 && p_tm->tm_mon == 2 && p_tm->tm_mday == 15 && p_tm->tm_hour == 20 && p_tm->tm_min == 52) {
-//    digitalWrite(led, 0);
-//  }
+//  Serial.print(p_tm->tm_year);            //ตัวอย่างการนำค่าจาก Struct มาใช้
+//  Serial.print(" ");
+//  Serial.print(p_tm->tm_mon);
+//  Serial.print(" ");
+//  Serial.print(p_tm->tm_mday);
+//  Serial.print(" ");
+//  Serial.print(p_tm->tm_hour);
+//  Serial.print(" ");
+//  Serial.println(p_tm->tm_min);
+  if(p_tm->tm_year == 119 && p_tm->tm_mon == 2 && p_tm->tm_mday == 15 && p_tm->tm_hour == 20 && p_tm->tm_min == 51) {
+    digitalWrite(led, 1);
+  }
+  else if(p_tm->tm_year == 119 && p_tm->tm_mon == 2 && p_tm->tm_mday == 15 && p_tm->tm_hour == 20 && p_tm->tm_min == 52) {
+    digitalWrite(led, 0);
+  }
 }
