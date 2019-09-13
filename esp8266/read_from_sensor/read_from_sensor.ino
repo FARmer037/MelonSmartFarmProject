@@ -12,6 +12,9 @@ MCP3008 adc(CLOCK_PIN, MOSI_PIN, MISO_PIN, CS_PIN);
 
 DHT dht(DHTPIN, DHTTYPE);
 
+float t = 0;
+float h = 0;
+
 void setup() {
   Serial.begin(115200);
   Serial.println(F("DHTxx test!"));
@@ -22,34 +25,27 @@ void setup() {
 void loop() {
   delay(2000);
 
-  int SoilMoisture = adc.readADC(1);
-  int LDR = adc.readADC(3);
+  int SoilMoisture_sensor = adc.readADC(0);
+    int SoilMoisture = map(SoilMoisture_sensor, 1024, 0, 0, 100);
+    int LDR_sensor = adc.readADC(1);
+    int LDR = map(LDR_sensor, 1024, 0, 0, 100);
+    
+    h = dht.readHumidity();
+    t = dht.readTemperature();
 
-  float h = dht.readHumidity();
-  float t = dht.readTemperature();
-  float f = dht.readTemperature(true);
-
-  if (isnan(h) || isnan(t) || isnan(f)) {
-    Serial.println(F("Failed to read from DHT sensor!"));
-    return;
-  }
-
-  float hif = dht.computeHeatIndex(f, h);
-  float hic = dht.computeHeatIndex(t, h, false);
-
-  Serial.print(F("Humidity: "));
-  Serial.print(h);
-  Serial.println(F("%"));
-  
-  Serial.print(F("Temperature: "));
-  Serial.print(t);
-  Serial.print(F("°C "));
-  Serial.print(f);
-  Serial.println(F("°F"));
-
-  Serial.print("Soil Moisture = ");
-  Serial.println(SoilMoisture);
-  Serial.print("LDR = ");
-  Serial.println(LDR);
-  Serial.println();
+    Serial.print("Temperature = ");
+    Serial.print(t);
+    Serial.print("\t\t");
+    Serial.print("Humidity = ");
+    Serial.print(h);
+    Serial.println();
+    Serial.print("Soil Moisture = ");
+    Serial.print(SoilMoisture);
+    Serial.print(" %");
+    Serial.print("\t\t");
+    Serial.print("LDR = ");
+    Serial.print(LDR);
+    Serial.print(" %");
+    Serial.println();
+    Serial.println();
 }

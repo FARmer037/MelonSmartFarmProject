@@ -4,10 +4,6 @@
 #include <LCD.h>
 #include <LiquidCrystal_I2C.h>
 
-#define DAY 7           //  วันที่ปลูกเมล่อน
-#define MONTH 2
-#define YEAR 2019
-
 #define I2C_ADDR 0x27   //  กำหนดตำแหน่ง Address ของ I2C
 #define BACKLIGHT_PIN 3
 
@@ -18,14 +14,15 @@ const char* password = "fnei9721";            //ใส่รหัสผ่า�
 
 String ntp_day = "";
 String ntp_time = "";
-String build = "";
-String age = "";
 
 int timezone = 7 * 3600;                      //ค่า TimeZone ตามเวลาประเทศไทย
 int dst = 0;                                  //ค่า Date Swing Time
 
+int relay = D4;
+
 void setup()
 {
+  pinMode(relay, OUTPUT);
   Serial.begin(115200);
   Serial.setDebugOutput(true);
 
@@ -61,6 +58,13 @@ void setup()
 
 void loop()
 {
+  show_in_lcd();
+  water_the_plants();
+
+  delay(1000);
+}
+
+void show_in_lcd() {
   lcd.clear();
   time_t now = time(nullptr);
   struct tm* p_tm = localtime(&now);
@@ -82,13 +86,6 @@ void loop()
   ntp_day += "-";  
   ntp_day += String(p_tm->tm_year + 1900);
 
-  age = String((((p_tm->tm_mon + 1) - MONTH)*30) + p_tm->tm_mday - DAY);
-  build = String(DAY); 
-  build += "-";
-  build += String(MONTH);
-  build += "-";  
-  build += String(YEAR);
-
   lcd.setCursor(1, 0);
   lcd.print("Date :");
   lcd.setCursor(10, 0);
@@ -98,47 +95,35 @@ void loop()
   lcd.print("Time :");
   lcd.setCursor(10, 1); 
   lcd.print(ntp_time);
-
-  lcd.setCursor(1, 2);
-  lcd.print("Build :");
-  lcd.setCursor(10, 2);
-  lcd.print(build);
-  
-  lcd.setCursor(1, 3);
-  lcd.print("Age :");
-  lcd.setCursor(10, 3); 
-  lcd.print(age);
-  lcd.setCursor(15, 3);
-  lcd.print("days");
-
-  delay(1000);
 }
-/*
-String age_cal() {
-  if (p_tm->tm_mon + 1 == 1 || 
-      p_tm->tm_mon + 1 == 3 || 
-      p_tm->tm_mon + 1 == 5 || 
-      p_tm->tm_mon + 1 == 7 || 
-      p_tm->tm_mon + 1 == 8 || 
-      p_tm->tm_mon + 1 == 10 ||
-      p_tm->tm_mon + 1 == 12)
-      {
-        age = String((((p_tm->tm_mon + 1) - MONTH)*31) + p_tm->tm_mday - DAY);
-      }
-  else if (p_tm->tm_mon + 1 == 4 || 
-      p_tm->tm_mon + 1 == 6 || 
-      p_tm->tm_mon + 1 == 10 || 
-      p_tm->tm_mon + 1 == 11)
-      {
-        age = String((((p_tm->tm_mon + 1) - MONTH)*30) + p_tm->tm_mday - DAY);
-      }
-  else if (MONTH == 2)
-      {
-        if (p_tm->tm_year + 1900 % 4 == 0) {
-          age = String((((p_tm->tm_mon + 1) - MONTH)*29) + p_tm->tm_mday - DAY);
-        }
-        else {
-          age = String((((p_tm->tm_mon + 1) - MONTH)*28) + p_tm->tm_mday - DAY);
-        }
-      }
-}*/
+
+void water_the_plants() {
+  time_t now = time(nullptr);
+  struct tm* p_tm = localtime(&now);       
+  if(   p_tm->tm_year == 119 && p_tm->tm_mon == 3 
+        && p_tm->tm_hour == 7 && p_tm->tm_min == 00) {
+    digitalWrite(relay, 1);
+  }
+  else if(p_tm->tm_year == 119 && p_tm->tm_mon == 3 
+          && p_tm->tm_hour == 7 && p_tm->tm_min == 20) {
+    digitalWrite(relay, 0);
+  }
+
+  if ( p_tm->tm_year == 119 && p_tm->tm_mon == 3 
+       && p_tm->tm_hour == 11 && p_tm->tm_min == 00) {
+    digitalWrite(relay, 1);
+  }
+  else if(p_tm->tm_year == 119 && p_tm->tm_mon == 3 
+          && p_tm->tm_hour == 11 && p_tm->tm_min == 20) {
+    digitalWrite(relay, 0);
+  }
+
+  if (  p_tm->tm_year == 119 && p_tm->tm_mon == 3 
+        && p_tm->tm_hour == 15 && p_tm->tm_min == 00) {
+    digitalWrite(relay, 1);
+  }
+  else if(p_tm->tm_year == 119 && p_tm->tm_mon == 3 
+          && p_tm->tm_hour == 15 && p_tm->tm_min == 20) {
+    digitalWrite(relay, 0);
+  }
+}
