@@ -1,8 +1,12 @@
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
+#include <DHT.h>
 #include <time.h>
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h"
+
+#define DHTPIN 5
+#define DHTTYPE DHT22
 
 #define LINE_TOKEN "ZrHx4oHAJMZyYuy9HJb3kxgsjXcB5ekgjdzXJsF0V61"
 
@@ -11,6 +15,8 @@
 #define AIO_USERNAME  "FARmer037"
 #define AIO_KEY  "f7fc3c178a014d4bbada37a32acaf9cb"
 WiFiClient client;
+
+DHT dht(DHTPIN, DHTTYPE);
 
 Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
 
@@ -50,6 +56,8 @@ int state_day = 100;
 
 int ageOfMelon = 0;
 
+const unsigned long eventInterval = 60000;
+unsigned long previousTime = 0;
 
 //------------------------------------------------SETUP FUNCTION-------------------------------------------------------------------//
 void setup() {
@@ -84,11 +92,21 @@ void setup() {
 void loop() {
   if ((WiFi.status() == WL_CONNECTED))
   {
+    float t = dht.readTemperature();
+    float h = dht.readHumidity();
     int soil = read_soil();
     int ldr = read_ldr();
 
-    sendDataToAdafruit(soilmoisture, soil);
-    sendDataToAdafruit(lightintensity, ldr);
+    unsigned long currentTime = millis();
+
+    if(currentTime - previousTime >= eventInterval) {
+      sendDataToAdafruit(temp, t);
+      sendDataToAdafruit(humidity, h);
+      sendDataToAdafruit(soilmoisture, soil);
+      sendDataToAdafruit(lightintensity, ldr);
+
+      previousTime = currentTime;
+    }
     
     configTime(timezone, dst, "pool.ntp.org", "time.nist.gov");
     time_t now = time(nullptr);
