@@ -27,13 +27,15 @@ String m_Watered = "%E0%B8%A3%E0%B8%94%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B9%81%E0%B8
 String m_TernOn = "%E0%B9%80%E0%B8%9B%E0%B8%B4%E0%B8%94%E0%B9%84%E0%B8%9F%20LED%20Grow%20Light%20%E0%B9%81%E0%B8%A5%E0%B9%89%E0%B8%A7%20!";   //  เปิดไฟ LED Grow Light แล้ว !
 String m_TernOff = "%E0%B8%9B%E0%B8%B4%E0%B8%94%E0%B9%84%E0%B8%9F%20LED%20Grow%20Light%20%E0%B9%81%E0%B8%A5%E0%B9%89%E0%B8%A7%20!";           //  ปิดไฟ LED Grow Light แล้ว !
 
-
 //--------------------------------------------------------------------------------------------------------------------------------//
 const char* ssid = "AndroidAP";
 const char* password = "fnei9721";
 
 int timezone = 7 * 3600;                      //ค่า TimeZone ตามเวลาประเทศไทย
 int dst = 0;                                  //ค่า Date Swing Time
+
+String ntp_day = "";
+String ntp_time = "";
 
 //------------------------------------------------SET PIN--------------------------------------------------------------------------//
 int pump = 32;
@@ -137,6 +139,18 @@ void water(int soil) {
   time_t now = time(nullptr);
   struct tm* p_tm = localtime(&now);
 
+  ntp_time = String(p_tm->tm_hour);
+  ntp_time += ":";
+  ntp_time += String(p_tm->tm_min);
+  ntp_time += ":";
+  ntp_time += String(p_tm->tm_sec);
+  
+  ntp_day = String(p_tm->tm_mday); 
+  ntp_day += "-";
+  ntp_day += String(p_tm->tm_mon + 1);
+  ntp_day += "-";  
+  ntp_day += String(p_tm->tm_year + 1900);
+
   if(soil < 80) {
     if(p_tm->tm_hour == 8 && p_tm->tm_min == 0) {
       digitalWrite(pump, 1);
@@ -144,7 +158,7 @@ void water(int soil) {
       
       if(soil >= 80) {
         digitalWrite(pump, 0);
-        LINE_Notify(m_Watered);
+        LINE_Notify("\n" + ntp_day + " " + ntp_time + "\n" + m_Watered);
         sendStatusToAdafruit(pumpswitch, "OFF");
       }
     }
@@ -156,22 +170,33 @@ void turnOnTheLight(int ldr) {
   time_t now = time(nullptr);
   struct tm* p_tm = localtime(&now);
 
+  ntp_time = String(p_tm->tm_hour);
+  ntp_time += ":";
+  ntp_time += String(p_tm->tm_min);
+  ntp_time += ":";
+  ntp_time += String(p_tm->tm_sec);
+  
+  ntp_day = String(p_tm->tm_mday); 
+  ntp_day += "-";
+  ntp_day += String(p_tm->tm_mon + 1);
+  ntp_day += "-";  
+  ntp_day += String(p_tm->tm_year + 1900);
+
   if((p_tm->tm_hour >= 18) || p_tm->tm_hour <= 6 || ldr < 50) {
     digitalWrite(led, 1);
-    sendStatusToAdafruit(lightswitch, "ON");
 
     if(state_light == 0) {
-      LINE_Notify(m_TernOn);
-      sendStatusToAdafruit(lightswitch, "OFF");
+      LINE_Notify("\n" + ntp_day + " " + ntp_time + "\n" + m_TernOn);
+      sendStatusToAdafruit(lightswitch, "ON");
       state_light = 1;
     }
   }
   else {
     digitalWrite(led, 0);
-    sendStatusToAdafruit(lightswitch, "OFF");
 
     if(state_light == 1) {
-      LINE_Notify(m_TernOff);
+      LINE_Notify("\n" + ntp_day + " " + ntp_time + "\n" + m_TernOff);
+      sendStatusToAdafruit(lightswitch, "OFF");
       state_light = 0;
     }
   }
@@ -184,10 +209,9 @@ void age_of_melon() {
 
   if(state_day != p_tm->tm_mday) {
     ageOfMelon += 1;
+    sendDataToAdafruit(age, ageOfMelon-1);
     state_day = p_tm->tm_mday;
   }
-
-  sendDataToAdafruit(age, ageOfMelon-1);
   
   Serial.print("Age of Melon is ");
   Serial.print(ageOfMelon-1);
