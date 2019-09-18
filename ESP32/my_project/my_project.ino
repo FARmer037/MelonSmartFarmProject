@@ -84,6 +84,9 @@ void loop() {
   {
     int soil = read_soil();
     int ldr = read_ldr();
+
+    sendDataToAdafruit(soilmoisture, soil);
+    sendDataToAdafruit(lightintensity, ldr);
     
     configTime(timezone, dst, "pool.ntp.org", "time.nist.gov");
     time_t now = time(nullptr);
@@ -111,18 +114,6 @@ int read_soil() {
   int value1 = analogRead(soil_sensor);
   int soil = map(value1, 4095, 0, 0, 100);
 
-  if (MQTT_connect()) {
-    if(soilmoisture.publish(soil)) {
-      Serial.println("Data sent successfully.");
-    }
-    else {
-      Serial.println("Problem to send the data!");
-    }
-  }
-  else {
-    Serial.println("Problem connect to the site!");
-  }
-
   Serial.print("Soil = ");
   Serial.println(soil);
   Serial.println("%");
@@ -133,18 +124,6 @@ int read_soil() {
 int read_ldr() {
   int value2 = analogRead(ldr_sensor);
   int ldr = map(value2, 4095, 0, 0, 100);
-
-  if (MQTT_connect()) {
-    if(lightintensity.publish(ldr)) {
-      Serial.println("Data sent successfully.");
-    }
-    else {
-      Serial.println("Problem to send the data!");
-    }
-  }
-  else {
-    Serial.println("Problem connect to the site!");
-  }
 
   Serial.print("ldr = ");
   Serial.println(ldr);
@@ -161,33 +140,12 @@ void water(int soil) {
   if(soil < 80) {
     if(p_tm->tm_hour == 8 && p_tm->tm_min == 0) {
       digitalWrite(pump, 1);
-      if (MQTT_connect()) {
-        if(pumpswitch.publish("ON")) {
-          Serial.println("Data sent successfully.");
-        }
-        else {
-          Serial.println("Problem to send the data!");
-        }
-      }
-      else {
-        Serial.println("Problem connect to the site!");
-      }
-
+      sendStatusToAdafruit(pumpswitch, "ON");
+      
       if(soil >= 80) {
         digitalWrite(pump, 0);
-        if (MQTT_connect()) {
-          if(pumpswitch.publish("OFF")) {
-            Serial.println("Data sent successfully.");
-          }
-          else {
-            Serial.println("Problem to send the data!");
-          }
-        }
-        else {
-          Serial.println("Problem connect to the site!");
-        }
-        
         LINE_Notify(m_Watered);
+        sendStatusToAdafruit(pumpswitch, "OFF");
       }
     }
   }
@@ -200,48 +158,17 @@ void turnOnTheLight(int ldr) {
 
   if((p_tm->tm_hour >= 18) || p_tm->tm_hour <= 6 || ldr < 50) {
     digitalWrite(led, 1);
-    if (MQTT_connect()) {
-      if(lightswitch.publish("ON")) {
-        Serial.println("Data sent successfully.");
-      }
-      else {
-        Serial.println("Problem to send the data!");
-      }
-    }
-    else {
-      Serial.println("Problem connect to the site!");
-    }
+    sendStatusToAdafruit(lightswitch, "ON");
 
     if(state_light == 0) {
       LINE_Notify(m_TernOn);
-      if (MQTT_connect()) {
-        if(lightswitch.publish("OFF")) {
-          Serial.println("Data sent successfully.");
-        }
-        else {
-          Serial.println("Problem to send the data!");
-        }
-      }
-      else {
-        Serial.println("Problem connect to the site!");
-      }
-      
+      sendStatusToAdafruit(lightswitch, "OFF");
       state_light = 1;
     }
   }
   else {
     digitalWrite(led, 0);
-    if (MQTT_connect()) {
-        if(lightswitch.publish("OFF")) {
-          Serial.println("Data sent successfully.");
-        }
-        else {
-          Serial.println("Problem to send the data!");
-        }
-      }
-      else {
-        Serial.println("Problem connect to the site!");
-      }
+    sendStatusToAdafruit(lightswitch, "OFF");
 
     if(state_light == 1) {
       LINE_Notify(m_TernOff);
@@ -260,17 +187,7 @@ void age_of_melon() {
     state_day = p_tm->tm_mday;
   }
 
-  if (MQTT_connect()) {
-    if(age.publish(ageOfMelon-1)) {
-      Serial.println("Data sent successfully.");
-    }
-    else {
-      Serial.println("Problem to send the data!");
-    }
-  }
-  else {
-    Serial.println("Problem connect to the site!");
-  }
+  sendDataToAdafruit(age, ageOfMelon-1);
   
   Serial.print("Age of Melon is ");
   Serial.print(ageOfMelon-1);
@@ -328,4 +245,32 @@ boolean MQTT_connect() {
     }
   }
   return true;
+}
+
+void sendDataToAdafruit(Adafruit_MQTT_Publish feed, int value) {
+  if (MQTT_connect()) {
+    if(feed.publish(value)) {
+      Serial.println("Data sent successfully.");
+    }
+    else {
+      Serial.println("Problem to send the data!");
+    }
+  }
+  else {
+    Serial.println("Problem connect to the site!");
+  }
+}
+
+void sendStatusToAdafruit(Adafruit_MQTT_Publish feed, const char* sw_status) {
+  if (MQTT_connect()) {
+    if(feed.publish(sw_status)) {
+      Serial.println("Data sent successfully.");
+    }
+    else {
+      Serial.println("Problem to send the data!");
+    }
+  }
+  else {
+    Serial.println("Problem connect to the site!");
+  }
 }
