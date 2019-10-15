@@ -1,8 +1,3 @@
-/////////////////////////////////
-// Generated with a lot of love//
-// with TUNIOT FOR ESP32     //
-// Website: Easycoding.tn      //
-/////////////////////////////////
 #include <WiFi.h>
 
 int  i;
@@ -10,7 +5,7 @@ String  MyString;
 WiFiClient client;
 
 String MakerIFTTT_Key ;
-;String MakerIFTTT_Event;
+String MakerIFTTT_Event;
 
 char *append_str(char *here, String s) {  
  i=0; 
@@ -90,7 +85,7 @@ void loop()
 
 
       Serial.print("Value sent to Google sheets : ");
-      Serial.println(i);
+      Serial.println(MyString);
 
     }
     delay(20000);
