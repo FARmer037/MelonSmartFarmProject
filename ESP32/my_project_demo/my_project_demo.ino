@@ -25,8 +25,6 @@ Adafruit_MQTT_Publish temp = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/t
 Adafruit_MQTT_Publish humidity = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/humidity");
 Adafruit_MQTT_Publish soilmoisture = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/soilmoisture");
 Adafruit_MQTT_Publish lightintensity = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/lightintensity");
-Adafruit_MQTT_Publish pumpswitch = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/pumpswitch");
-Adafruit_MQTT_Publish lightswitch = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/lightswitch");
 Adafruit_MQTT_Publish age = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/age");
 
 //--------------------------------------------------------------------------------------------------------------------------------//
@@ -36,7 +34,7 @@ const char* password = "fnei9721";
 int timezone = 7 * 3600;                      //ค่า TimeZone ตามเวลาประเทศไทย
 int dst = 0;                                  //ค่า Date Swing Time
 
-time_t plant = 1570869727;                    //ค่าเวลาปลูก (จำนวนวินาทีตั้งแต่ 1 มกราคม 1900 เวลา 00:00:00)
+time_t plant = 1571208760;                    //ค่าเวลาปลูก (จำนวนวินาทีตั้งแต่ 1 มกราคม 1900 เวลา 00:00:00)
 
 int soil_sensor = 34;
 int ldr_sensor = 35;
@@ -87,6 +85,8 @@ void loop() {
     
     // ส่งทุก ๆ 1 นาที
     if(currentTime - previousTime >= eventInterval) {
+      print_value(t, h, soil, ldr, n_day);
+      
       sendDataToAdafruit(temp, t);
       sendDataToAdafruit(humidity, h);
       sendDataToAdafruit(soilmoisture, soil);
@@ -111,20 +111,12 @@ int read_soil() {
   int value1 = analogRead(soil_sensor);
   int soil = map(value1, 4095, 0, 0, 100);
 
-  Serial.print("Soil = ");
-  Serial.println(soil);
-  Serial.println("%");
-
   return soil;
 }
 
 int read_ldr() {
   int value2 = analogRead(ldr_sensor);
   int ldr = map(value2, 4095, 0, 0, 100);
-
-  Serial.print("ldr = ");
-  Serial.println(ldr);
-  Serial.println("%");
 
   return ldr;
 }
@@ -137,6 +129,26 @@ int age_of_melon() {
   int age = diff/86400;
 
   return age;
+}
+
+void print_value(int t, int h, int soil, int ldr, int age) {
+  Serial.print("Temperature = ");
+  Serial.print(t);
+  Serial.print("      ");
+  Serial.print("Humidity = ");
+  Serial.print(h);
+  Serial.println("");
+
+  Serial.print("Soil Moistuer = ");
+  Serial.print(soil);
+  Serial.print("      ");
+  Serial.print("Light Intensity = ");
+  Serial.print(ldr);
+  Serial.println("");
+
+  Serial.print("Age of Melon = ");
+  Serial.print(ldr);
+  Serial.println("Days");
 }
 
 boolean MQTT_connect() {  
