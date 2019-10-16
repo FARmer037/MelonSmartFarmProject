@@ -1,7 +1,6 @@
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <DHT.h>
-#include <time.h>
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h"
 
@@ -59,13 +58,7 @@ void setup() {
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-  configTime(timezone, dst, "pool.ntp.org", "time.nist.gov");     //ดึงเวลาจาก Server
-    Serial.println("\nWaiting for time");
-    while (!time(nullptr)) {
-      Serial.print("*");
-      delay(1000);
-    }
-    Serial.println("");
+  Serial.println("");
 
 }
 
@@ -87,11 +80,7 @@ void loop() {
     if(currentTime - previousTime >= eventInterval) {
       print_value(t, h, soil, ldr, n_day);
       
-      sendDataToAdafruit(temp, t);
-      sendDataToAdafruit(humidity, h);
-      sendDataToAdafruit(soilmoisture, soil);
-      sendDataToAdafruit(lightintensity, ldr);
-      sendDataToAdafruit(age, n_day);
+      sendDataToAdafruit(temp, humidity, soilmoisture, lightintensity, age, t, h, soil, ldr, n_day);
 
       previousTime = currentTime;
     }
@@ -147,8 +136,8 @@ void print_value(int t, int h, int soil, int ldr, int age) {
   Serial.println("");
 
   Serial.print("Age of Melon = ");
-  Serial.print(ldr);
-  Serial.println("Days");
+  Serial.print(age);
+  Serial.println(" Days");
 }
 
 boolean MQTT_connect() {  
@@ -167,9 +156,10 @@ boolean MQTT_connect() {
   return true;
 }
 
-void sendDataToAdafruit(Adafruit_MQTT_Publish feed, int value) {
+void sendDataToAdafruit(Adafruit_MQTT_Publish feed_t, Adafruit_MQTT_Publish feed_h, Adafruit_MQTT_Publish feed_soil, Adafruit_MQTT_Publish feed_ldr, 
+                        Adafruit_MQTT_Publish feed_n_day, int t, int h, int soil, int ldr, int n_day) {
   if (MQTT_connect()) {
-    if(feed.publish(value)) {
+    if(feed_t.publish(t) && feed_h.publish(h) && feed_soil.publish(soil) && feed_ldr.publish(ldr) && feed_n_day.publish(n_day)) {
       Serial.println("Data sent successfully.");
     }
     else {
